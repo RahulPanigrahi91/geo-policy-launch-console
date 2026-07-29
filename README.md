@@ -1,128 +1,110 @@
 # Geo Policy Launch Console
 
-Geo Policy Launch Console is a single-page web app that turns a proposed Maps‑like feature into a structured launch decision: policy risk score, stakeholder escalation path, enforcement plan (policy / tooling / human review), vendor readiness, and a 14‑day post‑launch monitoring plan.[web:27][web:77]
+Geo Policy Launch Console is a single-page web app that turns a proposed Maps-like feature into a structured launch decision: policy risk score, stakeholder escalation path, enforcement plan (policy / tooling / human review), vendor readiness, and a 14-day post-launch monitoring plan.
 
-## 1. What this project is
+## Repo name
 
-This project simulates how a Program Manager / Policy Specialist in Google Geo would operationalize policy for a new feature on Maps (e.g., AI-generated place summaries, user-submitted road edits, vendor-created data imports).[web:14][web:15]  
+**geo-policy-launch-console**
 
-Instead of a static policy document, the app asks structured questions about the feature (region, impact, abuse potential, privacy, government sensitivity, ML/vendor dependence), then produces:
+Description:
 
-- A deterministic policy **risk score** (0–100, Low/Moderate/High/Critical).[web:27][web:77]
-- A **stakeholder escalation path** (Policy, Product, Legal, Trust & Safety, Government Affairs, Tools/ML, Vendor Ops) based on selected risk factors.[web:14][web:15]
-- An **enforcement plan** split across policy rules, ML/tooling controls, and human/vendor workflows.[web:27][web:61]
-- A **vendor readiness** view: guidance completeness, SLA confidence, ambiguity flags, and status (Ready / Needs clarification / Blocked).[web:14][web:15]
-- A simple **post-launch watchlist** and first 14‑day monitoring plan.[web:27][web:80]
-
-The design mirrors Google Maps’ published approach to content trust and safety: clear policies, automated systems that assess content at scale, trained human operators and analysts, and extra safeguards during elevated abuse.[web:27][web:77]
+> Internal policy operations prototype for Geo/Maps-style feature launches with risk scoring, escalation routing, vendor readiness, and post-launch monitoring.
 
 ---
 
-## 2. Why it is relevant to Google Geo
+## What this project is
 
-The Program Manager, Policy Specialist – Geo role is described as:[web:14][web:15]
+This project simulates how a Program Manager / Policy Specialist in Google Geo would operationalize policy for a new feature on Maps, such as AI-generated place summaries, user-submitted road edits, or vendor-created data imports.
 
-- Developing and maintaining geo data policies for new Maps features.
-- Partnering with Product, Operations, Trust & Safety, Legal, and Government Affairs.
-- Partnering with Tools and Machine Intelligence teams to integrate policy into algorithms.
-- Managing sensitive policy escalations.
-- Managing vendor relationships for ongoing policy execution.
+Instead of a static policy document, the app asks structured questions about the feature — region, impact, abuse potential, privacy, government sensitivity, and ML/vendor dependence — then produces:
 
-Geo Policy Launch Console is a small, self-contained prototype of that operating model:
+- A deterministic policy risk score from 0 to 100, with Low / Moderate / High / Critical bands.
+- A stakeholder escalation path covering Policy, Product, Legal, Trust & Safety, Government Affairs, Tools/ML, and Vendor Ops.
+- An enforcement plan split across policy rules, ML/tooling controls, and human/vendor workflows.
+- A vendor readiness view with guidance completeness, SLA confidence, ambiguity flags, and status.
+- A post-launch watchlist and a first 14-day monitoring plan.
 
-- It **turns policy and risk into a repeatable workflow**, not just guidelines.
-- It **encodes cross-functional escalation logic** instead of relying on memory.
-- It **connects policy decisions to ML/tooling and vendor operations** in one view.[web:27][web:61][web:80]
-- It is designed so policy stakeholders can review and challenge the logic transparently, which is important in governance and trust contexts.
+The design mirrors how a real Geo policy operations workflow works: clear policy rules, automated assessment, human review, escalation handling, and ongoing monitoring.
 
 ---
 
-## 3. Core workflow
+## Why it is relevant to Google Geo
 
-The app follows a five-step policy operations workflow:[web:27][web:77]
+The Program Manager, Policy Specialist – Geo role focuses on developing geo data policies, partnering with Product, Operations, Trust & Safety, Legal, and Government Affairs, integrating policy into tools and models, handling sensitive escalations, and managing vendor relationships for ongoing policy execution.
+
+This prototype demonstrates that operating model in a simple, reviewable way. It shows how policy requirements can be turned into a repeatable workflow that connects risk, escalation, enforcement, and vendor operations.
+
+---
+
+## Core workflow
+
+The app follows a five-step policy operations workflow:
 
 1. **Feature intake**  
-   - Capture feature name, category (e.g., reviews, road edits, AI recommendations), region, launch type, content sources (user, vendor, partner, ML, internal), impact, abuse potential, privacy sensitivity, public/government sensitivity, vendor dependence, model/tool dependence, and known failure scenarios.
+   Capture feature name, category, region, launch type, content sources, impact, abuse potential, privacy sensitivity, public/government sensitivity, vendor dependence, model/tool dependence, and known failure scenarios.
 
 2. **Risk scoring**  
-   - Compute a visible 0–100 policy risk score using fixed weights.
-   - Map score into Low / Moderate / High / Critical risk bands.
+   Compute a visible risk score from 0 to 100 using fixed weights and map it to Low / Moderate / High / Critical.
 
 3. **Escalation routing**  
-   - Add Legal when privacy is High.
-   - Add Government Affairs when government sensitivity is High.
-   - Add Trust & Safety when abuse is High.
-   - Add Tools / ML when model dependence is High or content includes ML-generated outputs.
-   - Add Vendor Operations when vendor dependence is Partial or High.
-   - Always include Product and Policy.[web:14][web:15]
+   Recommend stakeholders such as Legal, Government Affairs, Trust & Safety, Tools/ML, Vendor Ops, plus Product and Policy.
 
 4. **Enforcement planning**  
-   - Split controls into:
-     - **Policy rule / launch requirements** (e.g., restricted attributes, prohibited content examples).
-     - **ML / tooling enforcement** (e.g., confidence thresholds, output auditing, rollback triggers).[web:26][web:34]
-     - **Human review / vendor operations** (e.g., QA sampling, escalation queues, SLA tracking).
+   Split controls into:
+   - Policy rule / launch requirements.
+   - ML / tooling enforcement.
+   - Human review / vendor operations.
 
-5. **Vendor readiness & monitoring**  
-   - Estimate:
-     - content guideline completeness (%),
-     - SLA confidence (%),
-     - ambiguity flags (missing description, missing failure scenarios, unclear ML scope, unclear vendor guidance).
-   - Derive vendor status: Ready / Needs clarification / Blocked.[web:14][web:79]
-   - Present four watch metrics (escalation volume, violation rate, false positive rate, vendor turnaround risk) and a brief 14‑day monitoring plan.[web:27][web:80]
+5. **Vendor readiness and monitoring**  
+   Estimate completeness, SLA confidence, and ambiguity flags, then derive vendor status and a 14-day monitoring plan.
 
 ---
 
-## 4. Included scenarios
+## Included scenarios
 
-The app ships with three sample scenarios so a reviewer can understand the workflow immediately:
+Three sample scenarios are preloaded:
 
-| Scenario                                        | Focus area                                                     |
-| ---------------------------------------------- | -------------------------------------------------------------- |
-| AI-generated place summary suggestions         | ML governance, content policy, hallucinations / bias, rollout |
-| Bulk vendor-created business category update   | Vendor execution, QA, SLA, ambiguity handling                 |
-| User-submitted road closure edits              | High impact, abuse potential, government sensitivity           |
+- AI-generated place summary suggestions.
+- Bulk vendor-created business category update.
+- User-submitted road closure edits.
 
-Each scenario pre-fills the intake form and produces a different mix of risk, escalations, controls, and vendor status.
+Each scenario pre-fills the form and shows a different risk, escalation, and readiness profile.
 
 ---
 
-## 5. Tech details
+## Tech details
 
-- Single-page static web app (`geo-policy-launch-console.html`)
+- Single-file static web app (`geo-policy-launch-console.html`)
 - HTML, CSS, vanilla JavaScript
 - Client-side state only
-- No backend, no login
-- Preloaded scenarios and deterministic logic
-- Printable one-page “launch brief” view (browser print)
-
-The architecture is intentionally simple: the goal is **policy and program thinking**, not infra complexity.
+- No backend
+- No login
+- Deterministic logic
+- Printable one-page launch brief
 
 ---
 
-## 6. How to run
+## How to run
 
 1. Clone the repo or download it as a ZIP.
-2. Open `geo-policy-launch-console.html` in any modern browser.
-3. Choose a sample scenario from the **Sample Scenarios** dropdown.
-4. Click **Run policy assessment** to view risk, escalations, controls, vendor readiness, and monitoring.
-5. Use **Compare scenarios** to see two launch paths side by side.
-6. Use **Download brief** (print) to generate a one-page launch summary for sharing.
+2. Open `geo-policy-launch-console.html` in a browser.
+3. Choose a sample scenario or fill in your own feature.
+4. Click **Run policy assessment**.
+5. Use **Compare scenarios** or **Download brief** if needed.
+
+No installation or backend setup is required.
 
 ---
 
-## 7. What a recruiter / interviewer should see
+## What a reviewer should notice
 
-- This is a **policy operations prototype**, not just a UI exercise.
-- The project directly reflects the responsibilities in the Geo Policy Specialist JD (policy creation, escalations, ML integration, vendor management).[web:14][web:15]
-- The logic is **transparent and reviewable**, which matters for governance and trust & safety.[web:27][web:61]
-- It demonstrates:
-  - product and program thinking,
-  - risk and policy intuition,
-  - ability to turn ambiguous requirements into a usable internal tool.
+- This is a policy operations prototype, not just a UI demo.
+- It maps directly to the responsibilities of the Geo Policy Specialist role.
+- The logic is transparent and easy to inspect.
+- It demonstrates product thinking, risk classification, stakeholder coordination, and operational execution.
 
 ---
 
-## 8. Disclaimer
+## Disclaimer
 
-This is a simulation prototype built only with publicly available information about Google Maps’ policies, trust & safety approach, and the Program Manager, Policy Specialist – Geo job description.[web:14][web:15][web:27][web:61][web:77]  
-It does not use internal Google data, systems, or proprietary workflows.
+This is a simulation prototype built only with public information and does not use internal Google data or proprietary systems.
