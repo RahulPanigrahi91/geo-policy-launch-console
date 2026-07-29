@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geo Policy Launch Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+      --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9; --color-surface-offset: #f3f0ec; --color-border: #d4d1ca; --color-divider: #dcd9d5;
+      --color-text: #28251d; --color-text-muted: #686760; --color-text-faint: #96958f; --color-text-inverse: #f9f8f4;
+      --color-primary: #0f6b72; --color-primary-hover: #0d565b; --color-primary-highlight: #d4e3e3;
+      --color-success: #437a22; --color-warning: #a56616; --color-error: #9b2f4f; --color-blue: #006494;
+      --radius-sm: 0.375rem; --radius-md: 0.625rem; --radius-lg: 0.9rem; --radius-xl: 1.15rem;
+      --shadow-sm: 0 1px 2px rgba(18,25,38,.05), 0 8px 24px rgba(18,25,38,.04);
+      --shadow-md: 0 2px 6px rgba(18,25,38,.06), 0 14px 36px rgba(18,25,38,.08);
+      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      --font-body: 'Satoshi', Inter, system-ui, sans-serif;
+      --font-display: 'Satoshi', Inter, system-ui, sans-serif;
+    }
+    [data-theme="dark"] {
+      --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #22211f; --color-surface-offset: #262522; --color-border: #393836; --color-divider: #32312f;
+      --color-text: #e3e0d8; --color-text-muted: #aaa79d; --color-text-faint: #7e7b72; --color-text-inverse: #171614;
+      --color-primary: #59a0a6; --color-primary-hover: #75b4b9; --color-primary-highlight: #243537;
+      --color-success: #7ab454; --color-warning: #d89a3d; --color-error: #d16f92; --color-blue: #6ea9d8;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.2), 0 10px 26px rgba(0,0,0,.18);
+      --shadow-md: 0 4px 12px rgba(0,0,0,.28), 0 18px 46px rgba(0,0,0,.3);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    body { margin:0; font-family: var(--font-body); font-size: var(--text-base); color: var(--color-text); background: var(--color-bg); line-height: 1.5; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; border: 0; background: none; }
+    a { color: inherit; }
+    .skip-link { position:absolute; left:-999px; top:0; }
+    .skip-link:focus { left: var(--space-4); top: var(--space-4); background: var(--color-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); z-index: 99; }
+    .app-shell { min-height: 100dvh; }
+    .topbar { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(10px); background: color-mix(in srgb, var(--color-bg) 90%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); }
+    .topbar-inner { max-width: 1600px; margin: 0 auto; padding: var(--space-4) var(--space-5); display:flex; align-items:center; justify-content:space-between; gap: var(--space-4); }
+    .brand { display:flex; align-items:center; gap: var(--space-3); min-width: 0; }
+    .brand-mark { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 10%, var(--color-surface)), color-mix(in srgb, var(--color-primary) 18%, var(--color-surface-offset))); display:grid; place-items:center; border:1px solid color-mix(in srgb, var(--color-primary) 18%, var(--color-border)); }
+    .brand-copy h1 { font-size: var(--text-lg); line-height:1.1; margin:0; font-weight:700; }
+    .brand-copy p { margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); }
+    .top-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap: var(--space-2); }
+    .btn { min-height: 44px; padding: 0 var(--space-4); border-radius: var(--radius-md); border:1px solid color-mix(in srgb, var(--color-text) 12%, transparent); background: var(--color-surface); transition: all var(--transition); display:inline-flex; align-items:center; gap: var(--space-2); font-size: var(--text-sm); }
+    .btn:hover { box-shadow: var(--shadow-sm); border-color: color-mix(in srgb, var(--color-text) 18%, transparent); }
+    .btn-primary { background: var(--color-primary); color: var(--color-text-inverse); border-color: transparent; }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-ghost { background: transparent; }
+    .layout { max-width: 1600px; margin: 0 auto; padding: var(--space-5); display:grid; grid-template-columns: 1.02fr 1.15fr .9fr; gap: var(--space-5); align-items:start; }
+    .panel { background: var(--color-surface); border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); overflow:hidden; }
+    .panel-header { padding: var(--space-5); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); display:flex; align-items:flex-start; justify-content:space-between; gap: var(--space-3); }
+    .panel-header h2 { margin:0; font-size: var(--text-lg); }
+    .panel-header p { margin: var(--space-2) 0 0; color: var(--color-text-muted); font-size: var(--text-sm); }
+    .panel-body { padding: var(--space-5); display:grid; gap: var(--space-5); }
+    .subtle { color: var(--color-text-muted); font-size: var(--text-sm); }
+    .form-grid { display:grid; gap: var(--space-4); }
+    .grid-2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--space-4); }
+    .field label, .group-label { display:block; margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: 700; }
+    input[type="text"], select, textarea { width:100%; min-height: 46px; padding: .8rem .9rem; border-radius: var(--radius-md); border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); background: var(--color-surface-2); }
+    textarea { min-height: 102px; resize: vertical; }
+    input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    .segmented, .checkboxes { display:flex; flex-wrap:wrap; gap: var(--space-2); }
+    .chip-input { position:relative; }
+    .chip-input input { position:absolute; opacity:0; pointer-events:none; }
+    .chip { display:inline-flex; align-items:center; gap: var(--space-2); min-height: 40px; padding: .55rem .8rem; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); background: var(--color-surface-2); font-size: var(--text-sm); }
+    .chip-input input:checked + .chip { background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); color: var(--color-primary); border-color: color-mix(in srgb, var(--color-primary) 28%, transparent); }
+    .toolbar-row { display:flex; flex-wrap:wrap; gap: var(--space-3); align-items:center; }
+    .toolbar-row > * { flex:1; min-width: 180px; }
+    .result-grid { display:grid; gap: var(--space-4); }
+    .hero-card { background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 6%, var(--color-surface)), var(--color-surface)); border: 1px solid color-mix(in srgb, var(--color-primary) 16%, transparent); border-radius: var(--radius-xl); padding: var(--space-5); display:grid; gap: var(--space-4); }
+    .score-wrap { display:flex; align-items:center; gap: var(--space-4); flex-wrap:wrap; }
+    .score-ring { --deg: 0deg; width: 92px; height: 92px; border-radius: 50%; background: conic-gradient(var(--color-primary) var(--deg), color-mix(in srgb, var(--color-text) 8%, transparent) 0); display:grid; place-items:center; }
+    .score-ring::after { content:""; width: 72px; height: 72px; border-radius:50%; background: var(--color-surface); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-text) 7%, transparent); }
+    .score-value { position:absolute; font-size: 1.35rem; font-weight:700; }
+    .score-stack { position:relative; display:grid; place-items:center; }
+    .badge { display:inline-flex; align-items:center; min-height: 30px; padding: 0 .75rem; border-radius: 999px; font-size: var(--text-xs); font-weight:700; letter-spacing:.04em; text-transform: uppercase; }
+    .badge.low { background: color-mix(in srgb, var(--color-success) 16%, var(--color-surface)); color: var(--color-success); }
+    .badge.moderate { background: color-mix(in srgb, var(--color-blue) 14%, var(--color-surface)); color: var(--color-blue); }
+    .badge.high { background: color-mix(in srgb, var(--color-warning) 16%, var(--color-surface)); color: var(--color-warning); }
+    .badge.critical { background: color-mix(in srgb, var(--color-error) 16%, var(--color-surface)); color: var(--color-error); }
+    .mini-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--space-4); }
+    .card { background: var(--color-surface-2); border: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); border-radius: var(--radius-lg); padding: var(--space-4); display:grid; gap: var(--space-3); }
+    .card h3, .card h4 { margin:0; font-size: 1rem; }
+    .chips { display:flex; flex-wrap:wrap; gap: var(--space-2); }
+    .stake-chip { padding: .45rem .7rem; border-radius:999px; font-size: var(--text-sm); background: var(--color-surface-offset); border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
+    .bucket-list, .checklist { display:grid; gap: var(--space-2); padding-left: 1rem; }
+    .check-item { display:flex; align-items:flex-start; gap: var(--space-2); font-size: var(--text-sm); }
+    .check-item input { margin-top: .25rem; }
+    .progress-block { display:grid; gap: var(--space-2); }
+    .progress-bar { height: 10px; border-radius: 999px; background: color-mix(in srgb, var(--color-text) 8%, transparent); overflow:hidden; }
+    .progress-fill { height:100%; border-radius: inherit; background: var(--color-primary); }
+    .metrics { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--space-3); }
+    .metric-card { background: var(--color-surface-2); border: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); border-radius: var(--radius-lg); padding: var(--space-4); }
+    .metric-top { display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); }
+    .metric-value { font-size: 1.15rem; font-weight:700; margin-top: var(--space-2); }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .green { background: var(--color-success); } .yellow { background: var(--color-warning); } .red { background: var(--color-error); }
+    table { width:100%; border-collapse: collapse; font-size: var(--text-sm); }
+    th, td { text-align:left; padding: .8rem .55rem; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); vertical-align: top; }
+    th { color: var(--color-text-muted); font-weight:700; }
+    .helper { border-bottom: 1px dashed color-mix(in srgb, var(--color-text) 25%, transparent); cursor: help; }
+    .note { padding: var(--space-4); border-radius: var(--radius-lg); background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface-2)); border:1px solid color-mix(in srgb, var(--color-primary) 14%, transparent); }
+    .summary { font-size: var(--text-sm); color: var(--color-text-muted); }
+    .modal { position: fixed; inset:0; background: rgba(10,10,10,.42); display:none; align-items:center; justify-content:center; padding: var(--space-4); z-index: 50; }
+    .modal.open { display:flex; }
+    .modal-card { width:min(1120px, 100%); max-height: 90dvh; overflow:auto; background: var(--color-surface); border-radius: var(--radius-xl); border:1px solid color-mix(in srgb, var(--color-text) 10%, transparent); box-shadow: var(--shadow-md); }
+    .modal-head { position:sticky; top:0; background: var(--color-surface); display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); padding: var(--space-5); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
+    .compare-grid { padding: var(--space-5); display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--space-4); }
+    .print-view { display:none; }
+    @media print {
+      body * { visibility:hidden; }
+      .print-view, .print-view * { visibility:visible; }
+      .print-view { display:block; position:absolute; inset:0; background:white; color:#111; padding: 24px; }
+    }
+    @media (max-width: 1220px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 720px) {
+      .topbar-inner { align-items:flex-start; flex-direction:column; }
+      .top-actions { width:100%; justify-content:flex-start; }
+      .grid-2, .mini-grid, .metrics, .compare-grid { grid-template-columns: 1fr; }
+      .layout { padding: var(--space-4); gap: var(--space-4); }
+      .panel-header, .panel-body { padding: var(--space-4); }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-label="Geo Policy Launch Console logo">
+              <path d="M4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8-8-3.6-8-8Z"></path>
+              <path d="M12 4c2.2 2.2 3.5 5 3.5 8S14.2 17.8 12 20"></path>
+              <path d="M12 4c-2.2 2.2-3.5 5-3.5 8S9.8 17.8 12 20"></path>
+              <path d="M4.7 9h14.6M4.7 15h14.6"></path>
+            </svg>
+          </div>
+          <div class="brand-copy">
+            <h1>Geo Policy Launch Console</h1>
+            <p>Policy intake, escalation routing, enforcement planning, and vendor readiness in one internal tool.</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <select id="scenarioSelect" aria-label="Sample Scenarios">
+            <option value="">Sample Scenarios</option>
+          </select>
+          <button class="btn" id="compareBtn">Compare scenarios</button>
+          <button class="btn" id="downloadBtn">Download brief</button>
+          <button class="btn btn-ghost" id="resetBtn">Reset assessment</button>
+          <button class="btn" id="themeToggle" aria-label="Toggle dark mode">Theme</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="layout">
+      <section class="panel" aria-labelledby="intake-title">
+        <div class="panel-header">
+          <div>
+            <h2 id="intake-title">Feature Intake</h2>
+            <p>Describe the launch, risk shape, content source, and operational dependencies.</p>
+          </div>
+          <span class="badge moderate">Live scenario</span>
+        </div>
+        <div class="panel-body">
+          <div class="toolbar-row">
+            <div>
+              <label class="group-label" for="featureName">Feature name</label>
+              <input id="featureName" type="text" />
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label for="featureCategory">Feature category</label><select id="featureCategory"></select></div>
+            <div class="field"><label for="region">Region</label><select id="region"></select></div>
+            <div class="field"><label for="launchType">Launch type</label><select id="launchType"></select></div>
+            <div class="field"><label for="compareScenario">Compare with</label><select id="compareScenario"></select></div>
+          </div>
+          <div class="field">
+            <span class="group-label">Content source</span>
+            <div class="checkboxes" id="contentSourceGroup"></div>
+          </div>
+          <div class="grid-2" id="radioGroups"></div>
+          <div class="field">
+            <label for="description">What is changing?</label>
+            <textarea id="description"></textarea>
+          </div>
+          <div class="field">
+            <label for="failureScenarios">Known failure or abuse scenarios</label>
+            <textarea id="failureScenarios"></textarea>
+          </div>
+          <div class="toolbar-row">
+            <button class="btn btn-primary" id="runBtn">Run policy assessment</button>
+            <div class="summary">Rule-based logic only. No backend, no fake AI, fully explainable output.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="results-title">
+        <div class="panel-header">
+          <div>
+            <h2 id="results-title">Assessment Results</h2>
+            <p>Policy risk, escalations, enforcement path, launch decision, and rationale.</p>
+          </div>
+          <span id="riskBadge" class="badge moderate">Moderate</span>
+        </div>
+        <div class="panel-body result-grid">
+          <div class="hero-card">
+            <div class="score-wrap">
+              <div class="score-stack">
+                <div class="score-ring" id="scoreRing"><div class="score-value" id="scoreValue">0</div></div>
+              </div>
+              <div>
+                <div class="subtle"><span class="helper" title="Score is based on impact, abuse, legal/privacy sensitivity, government sensitivity, vendor dependency, model dependency, and ML-generated content.">Overall policy risk score</span></div>
+                <div style="display:flex; align-items:center; gap:.7rem; margin-top:.35rem; flex-wrap:wrap;">
+                  <strong id="riskLabel" style="font-size:1.15rem;">Moderate</strong>
+                  <span id="riskBand" class="badge moderate">25–49 band</span>
+                </div>
+                <p class="summary" id="riskSummary">Launch risk appears manageable with normal controls.</p>
+              </div>
+            </div>
+            <div class="mini-grid">
+              <div class="card">
+                <h3><span class="helper" title="Readiness depends on risk band, privacy sensitivity, and escalation count.">Launch readiness</span></h3>
+                <div id="readinessBadge" class="badge moderate" style="width:max-content;">Ready with standard controls</div>
+                <p class="summary" id="readinessText"></p>
+              </div>
+              <div class="card">
+                <h3>Escalation path</h3>
+                <div class="chips" id="stakeholderChips"></div>
+                <p class="summary" id="stakeholderSummary"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mini-grid">
+            <article class="card">
+              <h3>Policy rule / launch requirements</h3>
+              <ul class="bucket-list" id="policyBucket"></ul>
+            </article>
+            <article class="card">
+              <h3>ML / tooling enforcement</h3>
+              <ul class="bucket-list" id="mlBucket"></ul>
+            </article>
+          </div>
+
+          <article class="card">
+            <h3>Human review / vendor operations</h3>
+            <ul class="bucket-list" id="humanBucket"></ul>
+          </article>
+
+          <article class="note">
+            <h3 style="margin:0 0 .5rem; font-size:1rem;">Reasoning summary</h3>
+            <p id="reasoningSummary" style="margin:0;"></p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="execution-title">
+        <div class="panel-header">
+          <div>
+            <h2 id="execution-title">Execution Plan</h2>
+            <p>Turn assessment outputs into launch actions, vendor readiness checks, and post-launch monitoring.</p>
+          </div>
+          <span class="badge low">Operational plan</span>
+        </div>
+        <div class="panel-body">
+          <article class="card">
+            <h3>Policy checklist</h3>
+            <div class="checklist" id="policyChecklist"></div>
+          </article>
+
+          <article class="card">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); flex-wrap:wrap;">
+              <h3 style="margin:0;">Vendor readiness</h3>
+              <span id="vendorStatusBadge" class="badge moderate">Needs clarification</span>
+            </div>
+            <div class="progress-block">
+              <div class="subtle">Content guideline completeness <strong id="completenessValue">0%</strong></div>
+              <div class="progress-bar"><div class="progress-fill" id="completenessBar" style="width:0%"></div></div>
+            </div>
+            <div class="progress-block">
+              <div class="subtle">SLA confidence <strong id="slaValue">0%</strong></div>
+              <div class="progress-bar"><div class="progress-fill" id="slaBar" style="width:0%"></div></div>
+            </div>
+            <div class="subtle">Ambiguity flags: <strong id="ambiguityFlags">0</strong></div>
+            <p class="summary" id="vendorSummary"></p>
+          </article>
+
+          <article class="card">
+            <h3>Post-launch watchlist</h3>
+            <div class="metrics" id="watchMetrics"></div>
+            <div>
+              <h4 style="margin: var(--space-4) 0 .4rem;">First 14-day monitoring plan</h4>
+              <table>
+                <thead><tr><th>Period</th><th>Focus areas</th><th>Owner</th></tr></thead>
+                <tbody id="monitoringTable"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <div class="modal" id="compareModal" aria-hidden="true" role="dialog" aria-labelledby="compareTitle">
+      <div class="modal-card">
+        <div class="modal-head">
+          <div>
+            <h2 id="compareTitle" style="margin:0; font-size:1.15rem;">Scenario comparison</h2>
+            <p class="subtle" style="margin:.25rem 0 0;">Compare risk, escalations, readiness, and vendor clarity across two launch scenarios.</p>
+          </div>
+          <button class="btn" id="closeCompare">Close</button>
+        </div>
+        <div class="compare-grid" id="compareContent"></div>
+      </div>
+    </div>
+
+    <section class="print-view" id="printView"></section>
+  </div>
+
+  <script>
+    const options = {
+      featureCategory: ['Business profile edit','User review feature','Place attribute update','Road/map edit','AI-generated recommendation','Location photo upload','Third-party data import'],
+      region: ['Global','India','US','EU','APAC','LATAM'],
+      launchType: ['New feature','Expansion','Policy update','Experiment'],
+      radios: {
+        impact: ['Low','Medium','High'],
+        abuse: ['Low','Medium','High'],
+        privacy: ['Low','Medium','High'],
+        government: ['Low','Medium','High'],
+        vendor: ['None','Partial','High'],
+        model: ['None','Moderate','High']
+      },
+      contentSources: ['User-generated','Partner-provided','Vendor-created','ML-generated','Internal data']
+    };
+
+    const scenarios = {
+      ai_summary: {
+        featureName: 'AI-generated place summary suggestions',
+        featureCategory: 'AI-generated recommendation',
+        region: 'Global',
+        launchType: 'New feature',
+        contentSources: ['ML-generated','Internal data'],
+        impact: 'High', abuse: 'High', privacy: 'Medium', government: 'Medium', vendor: 'Partial', model: 'High',
+        description: 'Generate short place summaries using model-derived signals so users can scan relevance faster on listing surfaces.',
+        failureScenarios: 'Hallucinated place facts, culturally sensitive wording, misleading summaries for regulated places, biased outputs during news spikes.'
+      },
+      vendor_update: {
+        featureName: 'Bulk vendor-created business category update',
+        featureCategory: 'Third-party data import',
+        region: 'India',
+        launchType: 'Expansion',
+        contentSources: ['Vendor-created','Partner-provided','Internal data'],
+        impact: 'Medium', abuse: 'Medium', privacy: 'Low', government: 'Low', vendor: 'High', model: 'Moderate',
+        description: 'Allow approved vendor operations teams to refresh business categories in bulk for underserved local listings.',
+        failureScenarios: 'Misclassification of businesses, stale category mappings, uneven QA across regions, delayed rollback if bad data lands at scale.'
+      },
+      road_closure: {
+        featureName: 'User-submitted road closure edits',
+        featureCategory: 'Road/map edit',
+        region: 'US',
+        launchType: 'Experiment',
+        contentSources: ['User-generated','Internal data'],
+        impact: 'High', abuse: 'High', privacy: 'Low', government: 'High', vendor: 'None', model: 'Moderate',
+        description: 'Let users submit short-lived road closure edits that may be published faster in limited geographies.',
+        failureScenarios: 'Coordinated false closures, manipulation around events, emergency-route impact, stale closures not expiring in time.'
+      }
+    };
+
+    const state = { theme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light', checklistState: {}, currentScenario: 'ai_summary' };
+    document.documentElement.setAttribute('data-theme', state.theme);
+
+    const el = id => document.getElementById(id);
+
+    function populateSelect(id, arr) {
+      const select = el(id);
+      select.innerHTML = arr.map(v => `<option value="${v}">${v}</option>`).join('');
+    }
+
+    function buildContentSources() {
+      el('contentSourceGroup').innerHTML = options.contentSources.map(v => `
+        <label class="chip-input">
+          <input type="checkbox" value="${v}" name="contentSources">
+          <span class="chip">${v}</span>
+        </label>
+      `).join('');
+    }
+
+    function buildRadioGroups() {
+      const labels = {
+        impact: 'User impact level', abuse: 'Abuse potential', privacy: 'Legal/privacy sensitivity', government: 'Government/public sensitivity', vendor: 'Vendor dependency', model: 'Model/tool dependency'
+      };
+      el('radioGroups').innerHTML = Object.entries(options.radios).map(([key, values]) => `
+        <fieldset class="field card" style="padding:var(--space-4);">
+          <legend class="group-label">${labels[key]}</legend>
+          <div class="segmented">
+            ${values.map(v => `
+              <label class="chip-input">
+                <input type="radio" name="${key}" value="${v}">
+                <span class="chip">${v}</span>
+              </label>`).join('')}
+          </div>
+        </fieldset>
+      `).join('');
+    }
+
+    function populateScenarioDropdowns() {
+      const opts = Object.entries(scenarios).map(([key, val]) => `<option value="${key}">${val.featureName}</option>`).join('');
+      el('scenarioSelect').innerHTML = `<option value="">Sample Scenarios</option>${opts}`;
+      el('compareScenario').innerHTML = Object.entries(scenarios).map(([key, val]) => `<option value="${key}">${val.featureName}</option>`).join('');
+    }
+
+    function applyScenario(key) {
+      const s = scenarios[key];
+      state.currentScenario = key;
+      el('featureName').value = s.featureName;
+      el('featureCategory').value = s.featureCategory;
+      el('region').value = s.region;
+      el('launchType').value = s.launchType;
+      document.querySelectorAll('input[name="contentSources"]').forEach(box => { box.checked = s.contentSources.includes(box.value); });
+      ['impact','abuse','privacy','government','vendor','model'].forEach(name => {
+        document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.checked = r.value === s[name]);
+      });
+      el('description').value = s.description;
+      el('failureScenarios').value = s.failureScenarios;
+      el('compareScenario').value = key === 'ai_summary' ? 'vendor_update' : 'ai_summary';
+      runAssessment();
+    }
+
+    function getFormData() {
+      return {
+        featureName: el('featureName').value.trim(),
+        featureCategory: el('featureCategory').value,
+        region: el('region').value,
+        launchType: el('launchType').value,
+        contentSources: [...document.querySelectorAll('input[name="contentSources"]:checked')].map(x => x.value),
+        impact: document.querySelector('input[name="impact"]:checked')?.value || 'Low',
+        abuse: document.querySelector('input[name="abuse"]:checked')?.value || 'Low',
+        privacy: document.querySelector('input[name="privacy"]:checked')?.value || 'Low',
+        government: document.querySelector('input[name="government"]:checked')?.value || 'Low',
+        vendor: document.querySelector('input[name="vendor"]:checked')?.value || 'None',
+        model: document.querySelector('input[name="model"]:checked')?.value || 'None',
+        description: el('description').value.trim(),
+        failureScenarios: el('failureScenarios').value.trim()
+      };
+    }
+
+    function calculateAssessment(data) {
+      const scores = {
+        impact: { Low:10, Medium:20, High:30 },
+        abuse: { Low:10, Medium:20, High:30 },
+        privacy: { Low:5, Medium:15, High:25 },
+        government: { Low:5, Medium:15, High:25 },
+        vendor: { None:0, Partial:5, High:10 },
+        model: { None:0, Moderate:5, High:10 }
+      };
+      let score = scores.impact[data.impact] + scores.abuse[data.abuse] + scores.privacy[data.privacy] + scores.government[data.government] + scores.vendor[data.vendor] + scores.model[data.model];
+      if (data.contentSources.includes('ML-generated')) score += 10;
+      score = Math.min(score, 100);
+      const risk = score <= 24 ? 'Low' : score <= 49 ? 'Moderate' : score <= 74 ? 'High' : 'Critical';
+      const band = risk === 'Low' ? '0–24 band' : risk === 'Moderate' ? '25–49 band' : risk === 'High' ? '50–74 band' : '75–100 band';
+
+      const stakeholders = ['Product','Policy'];
+      if (data.privacy === 'High') stakeholders.push('Legal');
+      if (data.government === 'High') stakeholders.push('Government Affairs');
+      if (data.abuse === 'High') stakeholders.push('Trust & Safety');
+      if (data.model === 'High' || data.contentSources.includes('ML-generated')) stakeholders.push('Tools / ML team');
+      if (['Partial','High'].includes(data.vendor)) stakeholders.push('Vendor Operations lead');
+
+      const uniqStakeholders = [...new Set(stakeholders)];
+
+      const policyBucket = new Set(['draft launch policy language']);
+      const mlBucket = new Set();
+      const humanBucket = new Set();
+
+      if (data.contentSources.includes('ML-generated')) {
+        mlBucket.add('confidence threshold review');
+        mlBucket.add('model output auditing');
+        mlBucket.add('rollback trigger');
+        policyBucket.add('declare content provenance and allowed output scope');
+      }
+      if (data.contentSources.includes('User-generated')) {
+        policyBucket.add('content policy eligibility checks');
+        humanBucket.add('abuse reporting path');
+      }
+      if (data.contentSources.includes('Vendor-created') || data.contentSources.includes('Partner-provided')) {
+        humanBucket.add('QA sampling');
+        humanBucket.add('SLA tracking');
+        humanBucket.add('exception queue');
+      }
+      if (data.abuse === 'High') {
+        humanBucket.add('manual escalation queue');
+        humanBucket.add('post-launch monitoring');
+        policyBucket.add('high-risk abuse pattern guidance');
+      }
+      if (data.privacy === 'High') {
+        policyBucket.add('restricted attribute guidance');
+        humanBucket.add('sensitive data review');
+      }
+      if (data.government === 'High') {
+        policyBucket.add('regional escalation and public-sensitivity exceptions');
+      }
+      if (data.vendor === 'High') {
+        humanBucket.add('daily vendor QA calibration');
+      }
+      if (data.model !== 'None') {
+        mlBucket.add('confidence-based triage');
+      }
+
+      let readiness = 'Ready with standard controls';
+      if (risk === 'Critical') readiness = 'Not ready for launch';
+      else if (risk === 'High' && uniqStakeholders.length >= 4) readiness = 'Ready with escalations';
+      else if ((risk === 'Moderate' || risk === 'Low') && data.privacy !== 'High') readiness = 'Ready with standard controls';
+      else if (data.privacy === 'High') readiness = 'Ready with escalations';
+
+      const checklist = [];
+      checklist.push('Draft policy language','Review edge cases','Define launch metrics');
+      if (risk === 'High' || risk === 'Critical' || data.abuse === 'High') checklist.push('Create escalation SOP');
+      if (data.contentSources.includes('ML-generated') || data.model !== 'None') checklist.push('Define rollback triggers');
+      if (['Partial','High'].includes(data.vendor) || data.contentSources.includes('Vendor-created')) checklist.push('Publish reviewer guidance');
+      if (data.region !== 'Global' || data.government === 'High') checklist.push('Approve regional exceptions');
+      if (data.contentSources.some(v => ['User-generated','Vendor-created','Partner-provided'].includes(v))) checklist.push('Define prohibited/allowed content examples');
+
+      const uniqChecklist = [...new Set(checklist)];
+      if (!state.checklistState[data.featureName]) {
+        state.checklistState[data.featureName] = Object.fromEntries(uniqChecklist.map(item => [item, false]));
+      } else {
+        uniqChecklist.forEach(item => { if (!(item in state.checklistState[data.featureName])) state.checklistState[data.featureName][item] = false; });
+      }
+      const checklistState = state.checklistState[data.featureName];
+
+      let ambiguityFlags = 0;
+      if (!data.description) ambiguityFlags++;
+      if (!data.failureScenarios) ambiguityFlags++;
+      if (data.model === 'High' && !data.contentSources.includes('ML-generated')) ambiguityFlags++;
+      const reviewerGuidanceComplete = checklistState['Publish reviewer guidance'] === true;
+      if (data.vendor === 'High' && !reviewerGuidanceComplete) ambiguityFlags++;
+
+      let completeness = 50;
+      if (data.failureScenarios) completeness += 10;
+      if (['Partial','High'].includes(data.vendor) && uniqChecklist.includes('Publish reviewer guidance')) completeness += 10;
+      if (risk === 'Critical') completeness -= 15;
+      if (data.privacy === 'High') completeness -= 10;
+      completeness = Math.max(0, Math.min(100, completeness));
+
+      let sla = 80;
+      if (data.vendor === 'High') sla -= 20;
+      if (ambiguityFlags > 2) sla -= 15;
+      if (data.launchType === 'New feature') sla -= 10;
+      sla = Math.max(30, sla);
+
+      let vendorStatus = 'Needs clarification';
+      if (completeness >= 80 && sla > 70) vendorStatus = 'Ready';
+      else if (completeness < 50) vendorStatus = 'Blocked';
+
+      const watchMetrics = buildWatchMetrics(risk, data);
+      const reasoning = buildReasoning(data, risk, uniqStakeholders);
+      const stakeholderSummary = `${uniqStakeholders.join(', ')} should review this launch because the selected risk mix affects policy interpretation, tooling coverage, and operational execution.`;
+      const readinessText = readiness === 'Not ready for launch'
+        ? 'The current risk profile is too concentrated for launch without tighter policy definition and explicit mitigations.'
+        : readiness === 'Ready with escalations'
+        ? 'The feature can move forward only with named reviewers aligned before launch and a visible escalation path.'
+        : 'The launch can proceed with standard controls, documented monitoring, and normal policy sign-off.';
+
+      return { score, risk, band, stakeholders: uniqStakeholders, policyBucket:[...policyBucket], mlBucket:[...mlBucket], humanBucket:[...humanBucket], readiness, reasoning, stakeholderSummary, readinessText, checklist: uniqChecklist, checklistState, completeness, sla, ambiguityFlags, vendorStatus, watchMetrics };
+    }
+
+    function buildReasoning(data, risk, stakeholders) {
+      const pieces = [];
+      if (data.contentSources.includes('ML-generated')) pieces.push('ML-generated geo content');
+      if (data.abuse === 'High') pieces.push('high abuse potential');
+      if (data.impact === 'High') pieces.push('high user impact');
+      if (data.government === 'High') pieces.push('public-sensitivity concerns');
+      if (['Partial','High'].includes(data.vendor)) pieces.push('vendor execution dependency');
+      const joined = pieces.length ? pieces.join(', ') : 'a manageable control profile';
+      return `This feature introduces ${risk.toLowerCase()} policy risk because it combines ${joined}. Cross-functional review from ${stakeholders.join(', ')} is recommended before launch, with explicit controls for content quality, escalation handling, and post-launch monitoring.`;
+    }
+
+    function buildWatchMetrics(risk, data) {
+      const riskLevel = { Low: 1, Moderate: 2, High: 3, Critical: 4 }[risk];
+      const escalation = { value: `${8 * riskLevel + (data.abuse === 'High' ? 6 : 0)}/week`, threshold: '20/week', status: (riskLevel >= 4 || data.abuse === 'High') ? 'red' : riskLevel >= 3 ? 'yellow' : 'green' };
+      const violation = { value: `${(riskLevel * 0.7 + (data.contentSources.includes('ML-generated') ? 0.8 : 0.2)).toFixed(1)}%`, threshold: '2.0%', status: riskLevel >= 4 ? 'red' : riskLevel >= 3 ? 'yellow' : 'green' };
+      const falsePositive = { value: `${(riskLevel * 1.4 + (data.model !== 'None' ? 1.5 : 0.5)).toFixed(1)}%`, threshold: '6.0%', status: data.model === 'High' ? 'yellow' : 'green' };
+      const vendorRisk = { value: data.vendor === 'High' ? 'Elevated' : data.vendor === 'Partial' ? 'Moderate' : 'Low', threshold: 'Low–Moderate', status: data.vendor === 'High' ? 'red' : data.vendor === 'Partial' ? 'yellow' : 'green' };
+      return {
+        'Escalation volume': escalation,
+        'Policy violation rate': violation,
+        'False positive review rate': falsePositive,
+        'Vendor turnaround risk': vendorRisk
+      };
+    }
+
+    function renderAssessment(result, data) {
+      el('scoreValue').textContent = result.score;
+      el('scoreRing').style.setProperty('--deg', `${result.score * 3.6}deg`);
+      el('riskLabel').textContent = result.risk;
+      el('riskBand').textContent = result.band;
+      setBadge(el('riskBadge'), result.risk);
+      setBadge(el('riskBand'), result.risk, result.band);
+      el('riskSummary').textContent = `${data.featureCategory} in ${data.region} shows ${result.risk.toLowerCase()} policy risk based on current feature, abuse, and dependency inputs.`;
+      setBadge(el('readinessBadge'), readinessBadgeClass(result.readiness), result.readiness);
+      el('readinessText').textContent = result.readinessText;
+      el('stakeholderChips').innerHTML = result.stakeholders.map(s => `<span class="stake-chip">${s}</span>`).join('');
+      el('stakeholderSummary').textContent = result.stakeholderSummary;
+      renderList('policyBucket', result.policyBucket);
+      renderList('mlBucket', result.mlBucket);
+      renderList('humanBucket', result.humanBucket);
+      el('reasoningSummary').textContent = result.reasoning;
+
+      el('policyChecklist').innerHTML = result.checklist.map(item => `
+        <label class="check-item">
+          <input type="checkbox" data-check="${encodeURIComponent(item)}" ${result.checklistState[item] ? 'checked' : ''}>
+          <span>${item}</span>
+        </label>
+      `).join('');
+      el('policyChecklist').querySelectorAll('input[type="checkbox"]').forEach(box => {
+        box.addEventListener('change', () => {
+          const key = decodeURIComponent(box.dataset.check);
+          state.checklistState[data.featureName][key] = box.checked;
+          runAssessment(false);
+        });
+      });
+
+      el('completenessValue').textContent = `${result.completeness}%`;
+      el('completenessBar').style.width = `${result.completeness}%`;
+      el('slaValue').textContent = `${result.sla}%`;
+      el('slaBar').style.width = `${result.sla}%`;
+      el('ambiguityFlags').textContent = result.ambiguityFlags;
+      setBadge(el('vendorStatusBadge'), vendorBadgeClass(result.vendorStatus), result.vendorStatus);
+      el('vendorSummary').textContent = vendorSummary(result.vendorStatus, result.ambiguityFlags, data.vendor);
+
+      el('watchMetrics').innerHTML = Object.entries(result.watchMetrics).map(([name, meta]) => `
+        <div class="metric-card">
+          <div class="metric-top"><strong style="font-size:var(--text-sm);">${name}</strong><span class="status-dot ${meta.status}"></span></div>
+          <div class="metric-value">${meta.value}</div>
+          <div class="subtle">Threshold: ${meta.threshold}</div>
+        </div>
+      `).join('');
+
+      el('monitoringTable').innerHTML = `
+        <tr><td>Day 1–3</td><td>Validate early escalations, spot obvious policy misses, confirm dashboards and rollback trigger visibility.</td><td>Policy + Product</td></tr>
+        <tr><td>Day 4–7</td><td>Review false positives, check vendor calibration quality, compare live issues against launch assumptions.</td><td>Operations + Tools/ML</td></tr>
+        <tr><td>Day 8–14</td><td>Assess trend stability, regional exceptions, and whether controls should tighten, expand, or sunset.</td><td>Policy + Trust & Safety</td></tr>
+      `;
+      buildPrintView(data, result);
+    }
+
+    function setBadge(node, clsOrRisk, text) {
+      const map = { Low:'low', Moderate:'moderate', High:'high', Critical:'critical', Ready:'low', 'Needs clarification':'moderate', Blocked:'critical', 'Ready with standard controls':'low', 'Ready with escalations':'high', 'Not ready for launch':'critical' };
+      node.className = `badge ${map[clsOrRisk] || clsOrRisk || 'moderate'}`;
+      node.textContent = text || clsOrRisk;
+    }
+    function readinessBadgeClass(label) { return label; }
+    function vendorBadgeClass(label) { return label; }
+    function vendorSummary(status, flags, vendor) {
+      if (status === 'Ready') return 'Guidance quality and SLA confidence are strong enough for operational execution with limited ambiguity.';
+      if (status === 'Blocked') return `Vendor execution is blocked because the current launch package leaves too many unresolved decisions for ${vendor.toLowerCase()} dependency.`;
+      return `Execution can proceed only after closing ${flags} ambiguity flag(s) and tightening reviewer guidance for vendor-facing operations.`;
+    }
+    function renderList(id, items) {
+      el(id).innerHTML = items.map(item => `<li>${item}</li>`).join('');
+    }
+
+    function buildPrintView(data, result) {
+      el('printView').innerHTML = `
+        <h1 style="margin:0 0 12px;">Geo Policy Launch Brief</h1>
+        <p style="margin:0 0 18px; color:#555;">Feature: <strong>${data.featureName}</strong> · Category: ${data.featureCategory} · Region: ${data.region} · Launch type: ${data.launchType}</p>
+        <h2 style="margin:18px 0 8px;">Risk snapshot</h2>
+        <p>Risk score: <strong>${result.score}</strong> (${result.risk}) · Readiness: <strong>${result.readiness}</strong></p>
+        <p>${result.reasoning}</p>
+        <h2 style="margin:18px 0 8px;">Escalations</h2>
+        <p>${result.stakeholders.join(', ')}</p>
+        <h2 style="margin:18px 0 8px;">Controls</h2>
+        <p><strong>Policy:</strong> ${result.policyBucket.join(', ')}</p>
+        <p><strong>ML / Tooling:</strong> ${result.mlBucket.join(', ') || 'None'}</p>
+        <p><strong>Human / Vendor:</strong> ${result.humanBucket.join(', ')}</p>
+        <h2 style="margin:18px 0 8px;">Vendor readiness</h2>
+        <p>Status: <strong>${result.vendorStatus}</strong> · Completeness: ${result.completeness}% · SLA confidence: ${result.sla}% · Ambiguity flags: ${result.ambiguityFlags}</p>
+      `;
+    }
+
+    function compareScenarios() {
+      const primary = getFormData();
+      const secondaryKey = el('compareScenario').value;
+      const secondary = scenarios[secondaryKey];
+      const a = calculateAssessment(primary);
+      const b = calculateAssessment(secondary);
+      el('compareContent').innerHTML = [
+        { title: primary.featureName || 'Current scenario', data: primary, result: a },
+        { title: secondary.featureName, data: secondary, result: b }
+      ].map(block => `
+        <div class="card">
+          <h3>${block.title}</h3>
+          <div class="subtle">${block.data.featureCategory} · ${block.data.region}</div>
+          <div class="metric-value">${block.result.score} <span class="badge ${block.result.risk.toLowerCase()}">${block.result.risk}</span></div>
+          <p class="summary">${block.result.reasoning}</p>
+          <table>
+            <tr><th>Readiness</th><td>${block.result.readiness}</td></tr>
+            <tr><th>Escalations</th><td>${block.result.stakeholders.join(', ')}</td></tr>
+            <tr><th>Vendor status</th><td>${block.result.vendorStatus}</td></tr>
+            <tr><th>Ambiguity flags</th><td>${block.result.ambiguityFlags}</td></tr>
+          </table>
+        </div>
+      `).join('');
+      el('compareModal').classList.add('open');
+      el('compareModal').setAttribute('aria-hidden', 'false');
+    }
+
+    function runAssessment(scroll = false) {
+      const data = getFormData();
+      const result = calculateAssessment(data);
+      renderAssessment(result, data);
+      if (scroll) el('results-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function resetAssessment() {
+      state.checklistState = {};
+      applyScenario('ai_summary');
+    }
+
+    function init() {
+      populateSelect('featureCategory', options.featureCategory);
+      populateSelect('region', options.region);
+      populateSelect('launchType', options.launchType);
+      buildContentSources();
+      buildRadioGroups();
+      populateScenarioDropdowns();
+      applyScenario('ai_summary');
+
+      el('scenarioSelect').addEventListener('change', e => { if (e.target.value) applyScenario(e.target.value); });
+      el('runBtn').addEventListener('click', () => runAssessment(true));
+      el('resetBtn').addEventListener('click', resetAssessment);
+      el('compareBtn').addEventListener('click', compareScenarios);
+      el('closeCompare').addEventListener('click', () => { el('compareModal').classList.remove('open'); el('compareModal').setAttribute('aria-hidden', 'true'); });
+      el('compareModal').addEventListener('click', e => { if (e.target === el('compareModal')) el('closeCompare').click(); });
+      el('downloadBtn').addEventListener('click', () => window.print());
+      el('themeToggle').addEventListener('click', () => {
+        state.theme = state.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', state.theme);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
